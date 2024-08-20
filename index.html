@@ -212,13 +212,15 @@
             const tbody = document.querySelector('#statsTable tbody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
             const index = Array.from(document.querySelectorAll('th')).findIndex(th => th.getAttribute('data-column') === column);
+            
             rows.sort((a, b) => {
                 const aValue = column === 'oWAR' ? parseFloat(a.children[index].textContent) : a.children[index].textContent;
                 const bValue = column === 'oWAR' ? parseFloat(b.children[index].textContent) : b.children[index].textContent;
-                if (aValue > bValue) return ascending ? -1 : 1;
-                if (aValue < bValue) return ascending ? 1 : -1;
+                if (aValue > bValue) return ascending ? 1 : -1;
+                if (aValue < bValue) return ascending ? -1 : 1;
                 return 0;
             });
+        
             rows.forEach(row => tbody.appendChild(row));
             document.querySelectorAll('th').forEach(th => th.classList.remove('sorted-asc', 'sorted-desc'));
             const header = document.querySelector(`th[data-column="${column}"]`);
@@ -228,6 +230,7 @@
                 header.classList.add('sorted-desc');
             }
         }
+
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchAndParseCSV(csvUrl).then(data => {
