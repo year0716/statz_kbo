@@ -122,7 +122,7 @@
                     name: columns[0],
                     team: columns[1],  // 팀 이름에 (KBO) 추가
                     wRC: columns[2],
-                    oWAR: columns[3],
+                    oWAR: parseFloat(columns[3]),
                     atBats: columns[4],
                     plateAppearances: parseInt(columns[5], 10),
                     hits: columns[6],
@@ -211,20 +211,31 @@
         function sortTable(column, ascending) {
             const tbody = document.querySelector('#statsTable tbody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
-            const index = document.querySelector(`th[data-column="${column}"]`).cellIndex;
+            const index = Array.from(document.querySelectorAll('th')).findIndex(th => th.getAttribute('data-column') === column);
             rows.sort((a, b) => {
-                const aValue = a.children[index].textContent.trim();
-                const bValue = b.children[index].textContent.trim();
-                return (ascending ? aValue.localeCompare(bValue, undefined, { numeric: true }) : bValue.localeCompare(aValue, undefined, { numeric: true }));
+                const aValue = column === 'oWAR' ? parseFloat(a.children[index].textContent) : a.children[index].textContent;
+                const bValue = column === 'oWAR' ? parseFloat(b.children[index].textContent) : b.children[index].textContent;
+                if (aValue > bValue) return ascending ? -1 : 1;
+                if (aValue < bValue) return ascending ? 1 : -1;
+                return 0;
             });
-            tbody.innerHTML = '';
             rows.forEach(row => tbody.appendChild(row));
+            document.querySelectorAll('th').forEach(th => th.classList.remove('sorted-asc', 'sorted-desc'));
+            const header = document.querySelector(`th[data-column="${column}"]`);
+            if (ascending) {
+                header.classList.add('sorted-asc');
+            } else {
+                header.classList.add('sorted-desc');
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             fetchAndParseCSV(csvUrl).then(data => {
-                populateTable(data);
+                const initialFilteredData = filterData(data);
+                populateTable(initialFilteredData);
+                sortTable('oWAR', false); // Initial sort by oWAR descending
 
+                // Event listeners for filter inputs
                 document.querySelector('#teamFilter').addEventListener('change', () => {
                     const filteredData = filterData(data);
                     populateTable(filteredData);
@@ -245,8 +256,6 @@
                         const column = th.getAttribute('data-column');
                         const isAscending = !th.classList.contains('sorted-asc');
                         sortTable(column, isAscending);
-                        document.querySelectorAll('th').forEach(th => th.classList.remove('sorted-asc', 'sorted-desc'));
-                        th.classList.add(isAscending ? 'sorted-asc' : 'sorted-desc');
                     });
                 });
             });
