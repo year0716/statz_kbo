@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KBO Player Stats</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px; /* 글씨 크기 조정 */
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>KBO Player Stats</h1>
+    <table id="statsTable">
+        <thead>
+            <tr>
+                <th>이름</th>
+                <th>팀</th>
+                <th>wRC+</th>
+                <th>oWAR</th>
+                <th>타수</th>
+                <th>타석</th>
+                <th>안타</th>
+                <th>2루타</th>
+                <th>3루타</th>
+                <th>홈런</th>
+                <th>4구(고4X)</th>
+                <th>사구</th>
+                <th>희비</th>
+                <th>희번</th>
+                <th>고4</th>
+                <th>삼진</th>
+                <th>병살</th>
+                <th>도루</th>
+                <th>도루실패</th>
+                <th>득점</th>
+                <th>타점</th>
+                <th>타율</th>
+                <th>출루율</th>
+                <th>장타율</th>
+                <th>OPS</th>
+                <th>wOBA</th>
+                <th>wRAA</th>
+                <th>wSB</th>
+                <th>Spd</th>
+                <th>추정UBR</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        // CSV 파일 URL - GitHub의 Raw 파일 URL을 여기에 입력
+        const csvUrl = 'https://raw.githubusercontent.com/yourusername/yourrepo/main/player_stats.csv';
+
+        // CSV 파일을 가져와 파싱하는 함수
+        function fetchAndParseCSV(url) {
+            return fetch(url)
+                .then(response => response.text())
+                .then(text => parseCSV(text));
+        }
+
+        // CSV 파싱 함수
+        function parseCSV(text) {
+            const rows = text.split('\n').slice(1);  // 첫 줄은 헤더이므로 제거
+            return rows.map(row => {
+                const columns = row.split(',');
+                return {
+                    name: columns[0],
+                    team: columns[1],
+                    wRC: columns[2],
+                    oWAR: columns[3],
+                    atBats: columns[4],
+                    plateAppearances: columns[5],
+                    hits: columns[6],
+                    doubles: columns[7],
+                    triples: columns[8],
+                    homeRuns: columns[9],
+                    walks: columns[10],
+                    hitByPitch: columns[11],
+                    sacFlies: columns[12],
+                    sacBunts: columns[13],
+                    intentionalWalks: columns[14],
+                    strikeouts: columns[15],
+                    doublePlays: columns[16],
+                    steals: columns[17],
+                    caughtStealing: columns[18],
+                    runs: columns[19],
+                    rbis: columns[20],
+                    avg: columns[21],
+                    obp: columns[22],
+                    slg: columns[23],
+                    ops: columns[24],
+                    wOBA: columns[25],
+                    wRAA: columns[26],
+                    wSB: columns[27],
+                    spd: columns[28],
+                    ubr: columns[29]
+                };
+            });
+        }
+
+        // HTML 테이블에 데이터를 삽입하는 함수
+        function populateTable(data) {
+            const tbody = document.querySelector('#statsTable tbody');
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.team}</td>
+                    <td>${item.wRC}</td>
+                    <td>${item.oWAR}</td>
+                    <td>${item.atBats}</td>
+                    <td>${item.plateAppearances}</td>
+                    <td>${item.hits}</td>
+                    <td>${item.doubles}</td>
+                    <td>${item.triples}</td>
+                    <td>${item.homeRuns}</td>
+                    <td>${item.walks}</td>
+                    <td>${item.hitByPitch}</td>
+                    <td>${item.sacFlies}</td>
+                    <td>${item.sacBunts}</td>
+                    <td>${item.intentionalWalks}</td>
+                    <td>${item.strikeouts}</td>
+                    <td>${item.doublePlays}</td>
+                    <td>${item.steals}</td>
+                    <td>${item.caughtStealing}</td>
+                    <td>${item.runs}</td>
+                    <td>${item.rbis}</td>
+                    <td>${item.avg}</td>
+                    <td>${item.obp}</td>
+                    <td>${item.slg}</td>
+                    <td>${item.ops}</td>
+                    <td>${item.wOBA}</td>
+                    <td>${item.wRAA}</td>
+                    <td>${item.wSB}</td>
+                    <td>${item.spd}</td>
+                    <td>${item.ubr}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 데이터 가져와서 테이블에 넣기
+        fetchAndParseCSV(csvUrl).then(data => populateTable(data));
+    </script>
+
+</body>
+</html>
