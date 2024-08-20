@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>stats.kbo</title>
+    <title>stats.KBO</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -42,7 +42,7 @@
 <body>
 
     <h1>
-        stats.kbo
+        stats.KBO
         <span style="font-size: 10px; color: #666; margin-left: 10px;">( 선수 성적 출처 : fangraphs.com / 문제 시 삭제 )</span>
     </h1>
 
@@ -109,25 +109,28 @@
     </table>
 
     <script>
+        // CSV 파일 URL - 실제 URL을 여기에 입력하세요
         const csvUrl = 'https://raw.githubusercontent.com/year0716/statz_kbo/main/stat.csv';
 
+        // CSV 파일을 가져와 파싱하는 함수
         function fetchAndParseCSV(url) {
             return fetch(url)
                 .then(response => response.text())
                 .then(text => parseCSV(text));
         }
 
+        // CSV 파싱 함수
         function parseCSV(text) {
-            const rows = text.trim().split('\n').slice(1);
+            const rows = text.split('\n').slice(1);  // 첫 줄은 헤더이므로 제거
             return rows.map(row => {
                 const columns = row.split(',');
                 return {
                     name: columns[0],
-                    team: columns[1],  
-                    wRC: columns[2],
-                    oWAR: parseFloat(columns[3]),
+                    team: columns[1],
+                    wRC: parseFloat(columns[2]).toFixed(1),
+                    oWAR: parseFloat(columns[3]).toFixed(2),
                     atBats: columns[4],
-                    plateAppearances: parseInt(columns[5], 10),
+                    plateAppearances: columns[5],
                     hits: columns[6],
                     doubles: columns[7],
                     triples: columns[8],
@@ -143,22 +146,24 @@
                     caughtStealing: columns[18],
                     runs: columns[19],
                     rbis: columns[20],
-                    avg: columns[21],
-                    obp: columns[22],
-                    slg: columns[23],
-                    ops: columns[24],
-                    wOBA: columns[25],
-                    wRAA: columns[26],
-                    wSB: columns[27],
-                    spd: columns[28],
-                    ubr: columns[29]
+                    avg: parseFloat(columns[21]).toFixed(3),
+                    obp: parseFloat(columns[22]).toFixed(3),
+                    slg: parseFloat(columns[23]).toFixed(3),
+                    ops: parseFloat(columns[24]).toFixed(3),
+                    wOBA: parseFloat(columns[25]).toFixed(3),
+                    wRAA: parseFloat(columns[26]).toFixed(2),
+                    wSB: parseFloat(columns[27]).toFixed(2),
+                    spd: parseFloat(columns[28]).toFixed(2),
+                    ubr: parseFloat(columns[29]).toFixed(2)
                 };
             });
         }
 
+        // HTML 테이블에 데이터를 삽입하는 함수
         function populateTable(data) {
             const tbody = document.querySelector('#statsTable tbody');
-            tbody.innerHTML = ''; // Clear existing data
+            tbody.innerHTML = ''; // Clear existing rows
+
             data.forEach(item => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
@@ -197,78 +202,67 @@
             });
         }
 
+        // 데이터 필터링 함수
         function filterData(data) {
             const teamFilter = document.querySelector('#teamFilter').value;
-            const plateAppearancesFilter = document.querySelector('#plateAppearancesFilter').value;
+            const plateAppearancesFilter = parseFloat(document.querySelector('#plateAppearancesFilter').value) || 300;
             const nameSearch = document.querySelector('#nameSearch').value.toLowerCase();
 
             return data.filter(item => {
-                const matchesTeam = teamFilter === '' || item.team === teamFilter;
-                const matchesPA = plateAppearancesFilter === '' || item.plateAppearances >= plateAppearancesFilter;
-                const matchesName = nameSearch === '' || item.name.toLowerCase().includes(nameSearch);
+                const meetsTeamCriteria = teamFilter === '' || item.team === teamFilter;
+                const meetsPlateAppearancesCriteria = parseFloat(item.plateAppearances) >= plateAppearancesFilter;
+                const meetsNameSearchCriteria = item.name.toLowerCase().includes(nameSearch);
 
-                return matchesTeam && matchesPA && matchesName;
+                return meetsTeamCriteria && meetsPlateAppearancesCriteria && meetsNameSearchCriteria;
             });
         }
 
-        function sortTable(column, ascending) {
+        // 필터 및 정렬 적용 함수
+        function applyFiltersAndSort(data) {
+            const filteredData = filterData(data);
+            populateTable(filteredData);
+        }
+
+        // 테이블 열 클릭 시 정렬 함수
+        function sortTable(column, isAscending) {
             const tbody = document.querySelector('#statsTable tbody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
-            const index = Array.from(document.querySelectorAll('th')).findIndex(th => th.getAttribute('data-column') === column);
 
             rows.sort((a, b) => {
-                const aValue = column === 'oWAR' ? parseFloat(a.children[index].textContent) : a.children[index].textContent;
-                const bValue = column === 'oWAR' ? parseFloat(b.children[index].textContent) : b.children[index].textContent;
+                const aText = a.querySelector(`td:nth-child(${column})`).textContent.trim();
+                const bText = b.querySelector(`td:nth-child(${column})`).textContent.trim();
 
-                if (isNaN(aValue) || isNaN(bValue)) {
-                    // String comparison if values are not numbers
-                    return ascending ? aValue.localeCompare(bValue) : bValue.localeCompare(aValue);
-                }
+                const aValue = isNaN(parseFloat(aText)) ? aText : parseFloat(aText);
+                const bValue = isNaN(parseFloat(bText)) ? bText : parseFloat(bText);
 
-                // Number comparison
-                return ascending ? aValue - bValue : bValue - aValue;
+                return isAscending ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
             });
 
             rows.forEach(row => tbody.appendChild(row));
-            document.querySelectorAll('th').forEach(th => th.classList.remove('sorted-asc', 'sorted-desc'));
-            const header = document.querySelector(`th[data-column="${column}"]`);
-            if (ascending) {
-                header.classList.add('sorted-asc');
-            } else {
-                header.classList.add('sorted-desc');
-            }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchAndParseCSV(csvUrl).then(data => {
-                const initialFilteredData = filterData(data);
-                populateTable(initialFilteredData);
-                sortTable('oWAR', false); // Initial sort by oWAR descending
+        // 열 클릭 이벤트 핸들러
+        document.querySelectorAll('th').forEach((th, index) => {
+            th.addEventListener('click', () => {
+                const isAscending = !th.classList.contains('sorted-asc');
+                document.querySelectorAll('th').forEach(th => th.classList.remove('sorted-asc', 'sorted-desc'));
 
-                // Event listeners for filter inputs
-                document.querySelector('#teamFilter').addEventListener('change', () => {
-                    const filteredData = filterData(data);
-                    populateTable(filteredData);
-                });
+                if (isAscending) {
+                    th.classList.add('sorted-asc');
+                } else {
+                    th.classList.add('sorted-desc');
+                }
 
-                document.querySelector('#plateAppearancesFilter').addEventListener('input', () => {
-                    const filteredData = filterData(data);
-                    populateTable(filteredData);
-                });
-
-                document.querySelector('#nameSearch').addEventListener('input', () => {
-                    const filteredData = filterData(data);
-                    populateTable(filteredData);
-                });
-
-                document.querySelectorAll('th').forEach(th => {
-                    th.addEventListener('click', () => {
-                        const column = th.getAttribute('data-column');
-                        const isAscending = !th.classList.contains('sorted-asc');
-                        sortTable(column, isAscending);
-                    });
-                });
+                sortTable(index + 1, isAscending);
             });
+        });
+
+        // 데이터 가져와서 테이블에 넣기
+        fetchAndParseCSV(csvUrl).then(data => {
+            populateTable(filterData(data));
+            document.querySelector('#teamFilter').addEventListener('change', () => applyFiltersAndSort(data));
+            document.querySelector('#plateAppearancesFilter').addEventListener('input', () => applyFiltersAndSort(data));
+            document.querySelector('#nameSearch').addEventListener('input', () => applyFiltersAndSort(data));
         });
     </script>
 
