@@ -285,8 +285,11 @@
 
         // 데이터 가져와서 테이블에 넣기
         fetchAndParseCSV(csvUrl).then(data => {
-            populateTable(filterData(data));
+            const filteredData = filterData(data);
+            populateTable(filteredData);
+        
             document.querySelector('#teamFilter').addEventListener('change', () => applyFiltersAndSort(data));
+            document.querySelector('#PosFilter').addEventListener('change', () => applyFiltersAndSort(data));
             document.querySelector('#plateAppearancesFilter').addEventListener('input', () => applyFiltersAndSort(data));
             document.querySelector('#nameSearch').addEventListener('input', () => applyFiltersAndSort(data));
         });
