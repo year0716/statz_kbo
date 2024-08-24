@@ -126,7 +126,7 @@
     </table>
 
     <script>
-        // CSV 파일 URL
+        // CSV 파일 URL - 실제 URL을 여기에 입력하세요
         const csvUrl = 'https://raw.githubusercontent.com/year0716/statz_kbo/main/stat.csv';
 
         // CSV 파일을 가져와 파싱하는 함수
@@ -142,29 +142,29 @@
             return rows.map(row => {
                 const columns = row.split(',');
                 return {
-                    name: columns[0].trim(),
-                    team: columns[1].trim(),
-                    Pos: columns[2].trim(),
+                    name: columns[0],
+                    team: columns[1],
+                    Pos: columns[2],
                     wRC: parseFloat(columns[3]).toFixed(1),
                     oWAR: parseFloat(columns[4]).toFixed(2),
                     offWAR: parseFloat(columns[5]).toFixed(2),
-                    atBats: columns[6].trim(),
-                    plateAppearances: columns[7].trim(),
-                    hits: columns[8].trim(),
-                    doubles: columns[9].trim(),
-                    triples: columns[10].trim(),
-                    homeRuns: columns[11].trim(),
-                    walks: columns[12].trim(),
-                    hitByPitch: columns[13].trim(),
-                    sacFlies: columns[14].trim(),
-                    sacBunts: columns[15].trim(),
-                    intentionalWalks: columns[16].trim(),
-                    strikeouts: columns[17].trim(),
-                    doublePlays: columns[18].trim(),
-                    steals: columns[19].trim(),
-                    caughtStealing: columns[20].trim(),
-                    runs: columns[21].trim(),
-                    rbis: columns[22].trim(),
+                    atBats: columns[6],
+                    plateAppearances: columns[7],
+                    hits: columns[8],
+                    doubles: columns[9],
+                    triples: columns[10],
+                    homeRuns: columns[11],
+                    walks: columns[12],
+                    hitByPitch: columns[13],
+                    sacFlies: columns[14],
+                    sacBunts: columns[15],
+                    intentionalWalks: columns[16],
+                    strikeouts: columns[17],
+                    doublePlays: columns[18],
+                    steals: columns[19],
+                    caughtStealing: columns[20],
+                    runs: columns[21],
+                    rbis: columns[22],
                     avg: parseFloat(columns[23]).toFixed(3),
                     obp: parseFloat(columns[24]).toFixed(3),
                     slg: parseFloat(columns[25]).toFixed(3),
@@ -182,7 +182,7 @@
         // HTML 테이블에 데이터를 삽입하는 함수
         function populateTable(data) {
             const tbody = document.querySelector('#statsTable tbody');
-            tbody.innerHTML = ''; // 기존 행을 지웁니다
+            tbody.innerHTML = ''; // Clear existing rows
 
             data.forEach(item => {
                 const row = document.createElement('tr');
@@ -257,8 +257,8 @@
                 const aText = a.querySelector(`td:nth-child(${column})`).textContent.trim();
                 const bText = b.querySelector(`td:nth-child(${column})`).textContent.trim();
 
-                const aValue = isNaN(parseFloat(aText)) ? aText.toLowerCase() : parseFloat(aText);
-                const bValue = isNaN(parseFloat(bText)) ? bText.toLowerCase() : parseFloat(bText);
+                const aValue = isNaN(parseFloat(aText)) ? aText : parseFloat(aText);
+                const bValue = isNaN(parseFloat(bText)) ? bText : parseFloat(bText);
 
                 return isAscending ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
             });
@@ -285,9 +285,7 @@
         // 데이터 가져와서 테이블에 넣기
         fetchAndParseCSV(csvUrl).then(data => {
             populateTable(filterData(data));
-
             document.querySelector('#teamFilter').addEventListener('change', () => applyFiltersAndSort(data));
-            document.querySelector('#PosFilter').addEventListener('change', () => applyFiltersAndSort(data));
             document.querySelector('#plateAppearancesFilter').addEventListener('input', () => applyFiltersAndSort(data));
             document.querySelector('#nameSearch').addEventListener('input', () => applyFiltersAndSort(data));
         });
