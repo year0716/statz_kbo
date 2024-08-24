@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>stats.KBO</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            font-size: 12px;
+        }
+        th {
+            background-color: #f2f2f2;
+            cursor: pointer;
+        }
+        th.sorted-asc::after {
+            content: "▲";
+        }
+        th.sorted-desc::after {
+            content: "▼";
+        }
+        .filter-container {
+            margin-bottom: 20px;
+        }
+        .filter-container select, .filter-container input {
+            padding: 5px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>
+        stats.KBO
+        <span style="font-size: 10px; color: #666; margin-left: 10px;">( 선수 성적 출처 : fangraphs.com / 문제 시 삭제 )</span>
+    </h1>
+
+    <div class="filter-container">
+        <label for="teamFilter">팀:</label>
+        <select id="teamFilter">
+            <option value="">All</option>
+            <option value="Landers (KBO)">Landers (KBO)</option>
+            <option value="Wiz (KBO)">Wiz (KBO)</option>
+            <option value="Twins (KBO)">Twins (KBO)</option>
+            <option value="Heroes (KBO)">Heroes (KBO)</option>
+            <option value="Bears (KBO)">Bears (KBO)</option>
+            <option value="Eagles (KBO)">Eagles (KBO)</option>
+            <option value="Lions (KBO)">Lions (KBO)</option>
+            <option value="Dinos (KBO)">Dinos (KBO)</option>
+            <option value="Giants (KBO)">Giants (KBO)</option>
+            <option value="Tigers (KBO)">Tigers (KBO)</option>
+        </select>
+
+        <label for="PosFilter">포지션:</label>
+        <select id="PosFilter">
+            <option value="">All</option>
+            <option value="C">C</option>
+            <option value="1B">1B</option>
+            <option value="2B">2B</option>
+            <option value="3B">3B</option>
+            <option value="SS">SS</option>
+            <option value="LF">LF</option>
+            <option value="CF">CF</option>
+            <option value="RF">RF</option>
+            <option value="DH">DH</option>
+        </select>
+
+        <label for="plateAppearancesFilter">타석 수:</label>
+        <input type="number" id="plateAppearancesFilter" value="300" placeholder="Enter minimum PA">
+
+        <label for="nameSearch">선수 이름:</label>
+        <input type="text" id="nameSearch" placeholder="Search by name">
+    </div>
+
+    <table id="statsTable">
+        <thead>
+            <tr>
+                <th data-column="name">이름</th>
+                <th data-column="team">팀</th>
+                <th data-column="Pos">포지션</th>
+                <th data-column="wRC">wRC+</th>
+                <th data-column="oWAR">WAR*</th>
+                <th data-column="offWAR">offWAR</th>
+                <th data-column="atBats">타수</th>
+                <th data-column="plateAppearances">타석</th>
+                <th data-column="hits">안타</th>
+                <th data-column="doubles">2루타</th>
+                <th data-column="triples">3루타</th>
+                <th data-column="homeRuns">홈런</th>
+                <th data-column="walks">4구(고4X)</th>
+                <th data-column="hitByPitch">사구</th>
+                <th data-column="sacFlies">희비</th>
+                <th data-column="sacBunts">희번</th>
+                <th data-column="intentionalWalks">고4</th>
+                <th data-column="strikeouts">삼진</th>
+                <th data-column="doublePlays">병살</th>
+                <th data-column="steals">도루</th>
+                <th data-column="caughtStealing">도루실패</th>
+                <th data-column="runs">득점</th>
+                <th data-column="rbis">타점</th>
+                <th data-column="avg">타율</th>
+                <th data-column="obp">출루율</th>
+                <th data-column="slg">장타율</th>
+                <th data-column="ops">OPS</th>
+                <th data-column="wOBA">wOBA</th>
+                <th data-column="wRAA">wRAA</th>
+                <th data-column="wSB">wSB</th>
+                <th data-column="spd">Spd</th>
+                <th data-column="ubr">추정UBR</th>
+                <th data-column="PosAdj">Pos</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <script>
+        // CSV 파일 URL - 실제 URL을 여기에 입력하세요
+        const csvUrl = 'https://raw.githubusercontent.com/year0716/statz_kbo/main/stat.csv';
+
+        // CSV 파일을 가져와 파싱하는 함수
+        function fetchAndParseCSV(url) {
+            return fetch(url)
+                .then(response => response.text())
+                .then(text => parseCSV(text));
+        }
+
+        // CSV 파싱 함수
+        function parseCSV(text) {
+            const rows = text.split('\n').slice(1);  // 첫 줄은 헤더이므로 제거
+            return rows.map(row => {
+                const columns = row.split(',');
+                return {
+                    name: columns[0],
+                    team: columns[1],
+                    Pos: columns[2],
+                    wRC: parseFloat(columns[3]).toFixed(1),
+                    oWAR: parseFloat(columns[4]).toFixed(2),
+                    offWAR: parseFloat(columns[5]).toFixed(2),
+                    atBats: columns[6],
+                    plateAppearances: columns[7],
+                    hits: columns[8],
+                    doubles: columns[9],
+                    triples: columns[10],
+                    homeRuns: columns[11],
+                    walks: columns[12],
+                    hitByPitch: columns[13],
+                    sacFlies: columns[14],
+                    sacBunts: columns[15],
+                    intentionalWalks: columns[16],
+                    strikeouts: columns[17],
+                    doublePlays: columns[18],
+                    steals: columns[19],
+                    caughtStealing: columns[20],
+                    runs: columns[21],
+                    rbis: columns[22],
+                    avg: parseFloat(columns[23]).toFixed(3),
+                    obp: parseFloat(columns[24]).toFixed(3),
+                    slg: parseFloat(columns[25]).toFixed(3),
+                    ops: parseFloat(columns[26]).toFixed(3),
+                    wOBA: parseFloat(columns[27]).toFixed(3),
+                    wRAA: parseFloat(columns[28]).toFixed(2),
+                    wSB: parseFloat(columns[29]).toFixed(2),
+                    spd: parseFloat(columns[30]).toFixed(2),
+                    ubr: parseFloat(columns[31]).toFixed(2),
+                    Pos: parseFloat(columns[32]).toFixed(2)
+                };
+            });
+        }
+
+        // HTML 테이블에 데이터를 삽입하는 함수
+        function populateTable(data) {
+            const tbody = document.querySelector('#statsTable tbody');
+            tbody.innerHTML = ''; // Clear existing rows
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${item.team}</td>
+                    <td>${item.Pos}</td>
+                    <td>${item.wRC}</td>
+                    <td>${item.oWAR}</td>
+                    <td>${item.offWAR}</td>
+                    <td>${item.atBats}</td>
+                    <td>${item.plateAppearances}</td>
+                    <td>${item.hits}</td>
+                    <td>${item.doubles}</td>
+                    <td>${item.triples}</td>
+                    <td>${item.homeRuns}</td>
+                    <td>${item.walks}</td>
+                    <td>${item.hitByPitch}</td>
+                    <td>${item.sacFlies}</td>
+                    <td>${item.sacBunts}</td>
+                    <td>${item.intentionalWalks}</td>
+                    <td>${item.strikeouts}</td>
+                    <td>${item.doublePlays}</td>
+                    <td>${item.steals}</td>
+                    <td>${item.caughtStealing}</td>
+                    <td>${item.runs}</td>
+                    <td>${item.rbis}</td>
+                    <td>${item.avg}</td>
+                    <td>${item.obp}</td>
+                    <td>${item.slg}</td>
+                    <td>${item.ops}</td>
+                    <td>${item.wOBA}</td>
+                    <td>${item.wRAA}</td>
+                    <td>${item.wSB}</td>
+                    <td>${item.spd}</td>
+                    <td>${item.ubr}</td>
+                    <td>${item.Pos}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // 데이터 필터링 함수
+        function filterData(data) {
+            const teamFilter = document.querySelector('#teamFilter').value;
+            const plateAppearancesFilter = parseFloat(document.querySelector('#plateAppearancesFilter').value) || 300;
+            const nameSearch = document.querySelector('#nameSearch').value.toLowerCase();
+
+            return data.filter(item => {
+                const meetsTeamCriteria = teamFilter === '' || item.team === teamFilter;
+                const meetsPlateAppearancesCriteria = parseFloat(item.plateAppearances) >= plateAppearancesFilter;
+                const meetsNameSearchCriteria = item.name.toLowerCase().includes(nameSearch);
+
+                return meetsTeamCriteria && meetsPlateAppearancesCriteria && meetsNameSearchCriteria;
+            });
+        }
+
+        // 필터 및 정렬 적용 함수
+        function applyFiltersAndSort(data) {
+            const filteredData = filterData(data);
+            populateTable(filteredData);
+        }
+
+        // 테이블 열 클릭 시 정렬 함수
+        function sortTable(column, isAscending) {
+            const tbody = document.querySelector('#statsTable tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+
+            rows.sort((a, b) => {
+                const aText = a.querySelector(`td:nth-child(${column})`).textContent.trim();
+                const bText = b.querySelector(`td:nth-child(${column})`).textContent.trim();
+
+                const aValue = isNaN(parseFloat(aText)) ? aText : parseFloat(aText);
+                const bValue = isNaN(parseFloat(bText)) ? bText : parseFloat(bText);
+
+                return isAscending ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
+            });
+
+            rows.forEach(row => tbody.appendChild(row));
+        }
+
+        // 열 클릭 이벤트 핸들러
+        document.querySelectorAll('th').forEach((th, index) => {
+            th.addEventListener('click', () => {
+                const isAscending = !th.classList.contains('sorted-asc');
+                document.querySelectorAll('th').forEach(th => th.classList.remove('sorted-asc', 'sorted-desc'));
+
+                if (isAscending) {
+                    th.classList.add('sorted-asc');
+                } else {
+                    th.classList.add('sorted-desc');
+                }
+
+                sortTable(index + 1, isAscending);
+            });
+        });
+
+        // 데이터 가져와서 테이블에 넣기
+        fetchAndParseCSV(csvUrl).then(data => {
+            populateTable(filterData(data));
+            document.querySelector('#teamFilter').addEventListener('change', () => applyFiltersAndSort(data));
+            document.querySelector('#plateAppearancesFilter').addEventListener('input', () => applyFiltersAndSort(data));
+            document.querySelector('#nameSearch').addEventListener('input', () => applyFiltersAndSort(data));
+        });
+    </script>
+
+</body>
+</html>
