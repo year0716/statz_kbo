@@ -43,7 +43,7 @@
 
     <h1>
         stats.KBO
-        <span style="font-size: 10px; color: #666; margin-left: 10px;">( 선수 성적 출처 : fangraphs.com / 문제 시 삭제 )</span>
+        <span style="font-size: 10px; color: #666; margin-left: 10px;">( 선수 성적 저작권 문제 시 삭제 )</span>
     </h1>
 
     <div class="filter-container">
@@ -61,7 +61,7 @@
             <option value="Giants (KBO)">Giants (KBO)</option>
             <option value="Tigers (KBO)">Tigers (KBO)</option>
         </select>
-
+        
         <label for="PosFilter">포지션:</label>
         <select id="PosFilter">
             <option value="">All</option>
@@ -228,15 +228,17 @@
         // 데이터 필터링 함수
         function filterData(data) {
             const teamFilter = document.querySelector('#teamFilter').value;
+            const PosFilter = document.querySelector('#PosFilter').value;
             const plateAppearancesFilter = parseFloat(document.querySelector('#plateAppearancesFilter').value) || 300;
             const nameSearch = document.querySelector('#nameSearch').value.toLowerCase();
 
             return data.filter(item => {
+                const meetsPosCriteria = PosFilter === '' || item.Pos === PosFilter;
                 const meetsTeamCriteria = teamFilter === '' || item.team === teamFilter;
                 const meetsPlateAppearancesCriteria = parseFloat(item.plateAppearances) >= plateAppearancesFilter;
                 const meetsNameSearchCriteria = item.name.toLowerCase().includes(nameSearch);
 
-                return meetsTeamCriteria && meetsPlateAppearancesCriteria && meetsNameSearchCriteria;
+                return meetsPosCriteria && meetsTeamCriteria && meetsPlateAppearancesCriteria && meetsNameSearchCriteria;
             });
         }
 
