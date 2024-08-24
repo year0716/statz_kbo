@@ -231,16 +231,17 @@
             const PosFilter = document.querySelector('#PosFilter').value;
             const plateAppearancesFilter = parseFloat(document.querySelector('#plateAppearancesFilter').value) || 300;
             const nameSearch = document.querySelector('#nameSearch').value.toLowerCase();
-
+        
             return data.filter(item => {
                 const meetsPosCriteria = PosFilter === '' || item.Pos === PosFilter;
                 const meetsTeamCriteria = teamFilter === '' || item.team === teamFilter;
                 const meetsPlateAppearancesCriteria = parseFloat(item.plateAppearances) >= plateAppearancesFilter;
                 const meetsNameSearchCriteria = item.name.toLowerCase().includes(nameSearch);
-
+        
                 return meetsPosCriteria && meetsTeamCriteria && meetsPlateAppearancesCriteria && meetsNameSearchCriteria;
             });
         }
+
 
         // 필터 및 정렬 적용 함수
         function applyFiltersAndSort(data) {
@@ -252,17 +253,17 @@
         function sortTable(column, isAscending) {
             const tbody = document.querySelector('#statsTable tbody');
             const rows = Array.from(tbody.querySelectorAll('tr'));
-
+        
             rows.sort((a, b) => {
                 const aText = a.querySelector(`td:nth-child(${column})`).textContent.trim();
                 const bText = b.querySelector(`td:nth-child(${column})`).textContent.trim();
-
-                const aValue = isNaN(parseFloat(aText)) ? aText : parseFloat(aText);
-                const bValue = isNaN(parseFloat(bText)) ? bText : parseFloat(bText);
-
+        
+                const aValue = isNaN(parseFloat(aText)) ? aText.toLowerCase() : parseFloat(aText);
+                const bValue = isNaN(parseFloat(bText)) ? bText.toLowerCase() : parseFloat(bText);
+        
                 return isAscending ? (aValue > bValue ? 1 : -1) : (aValue < bValue ? 1 : -1);
             });
-
+        
             rows.forEach(row => tbody.appendChild(row));
         }
 
