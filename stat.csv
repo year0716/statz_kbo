@@ -1,4 +1,4 @@
-name,team,Pos,wRC,oWAR,offWAR,atBats,plateAppearances,hits,doubles,triples,homeRuns,walks,hitByPitch,sacFlies,sacBunts,intentionalWalks,strikeouts,doublePlays,steals,caughtStealing,runs,rbis,avg,obp,slg,ops,wOBA,wRAA,wSB,spd,ubr,Pos
+name,team,Pos,wRC,oWAR,offWAR,atBats,plateAppearances,hits,doubles,triples,homeRuns,walks,hitByPitch,sacFlies,sacBunts,intentionalWalks,strikeouts,doublePlays,steals,caughtStealing,runs,rbis,avg,obp,slg,ops,wOBA,wRAA,wSB,spd,ubr,PosAdj
 김도영,Tigers (KBO),3B,161.8,8.29,8.07,453,519,154,25,6,32,51,4,5,1,5,100,6,35,3,115,90,0.34,0.413,0.634,1.047,0.442,43.1,5.26,8.27,6.42,0.22
 송성문,Heroes (KBO),3B,148.4,6.31,6.11,421,482,146,21,3,16,49,3,8,0,1,60,4,16,0,67,89,0.347,0.413,0.525,0.938,0.421,31.3,3.08,6.04,2.59,0.2
 로하스,Wiz (KBO),LF,156.6,5.93,6.63,477,556,157,32,0,28,63,6,3,0,7,94,10,2,1,89,92,0.329,0.419,0.572,0.991,0.434,42.2,-0.27,2.85,-3.46,-0.7
